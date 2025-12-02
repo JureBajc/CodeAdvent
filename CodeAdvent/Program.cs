@@ -2,6 +2,7 @@
 using System.Linq;
 Console.WriteLine("Hello, World!");
 new Advent();
+new Advent2();
 
 public class Advent
 {
@@ -14,6 +15,7 @@ public class Advent
 
         Console.WriteLine($"del 1: {del1()}");
         Console.WriteLine($"del 2: {del2()}");
+        Console.WriteLine("\n");
     }
 
     public long del1()
@@ -72,5 +74,124 @@ public class Advent
             start %= 100;
         }
         return i;
+    }
+
+}
+
+public class Advent2
+{
+    private readonly string[] inputLinja;
+    private readonly string test = "5542145-5582046,243-401,884211-917063,1174-1665,767028-791710,308275-370459,285243789-285316649,3303028-3361832,793080-871112,82187-123398,7788-14096,21-34,33187450-33443224,2750031-2956556,19974-42168,37655953-37738891,1759-2640,55544-75026,9938140738-9938223673,965895186-966026269,502675-625082,11041548-11204207,1-20,3679-7591,8642243-8776142,40-88,2872703083-2872760877,532-998,211488-230593,3088932-3236371,442734-459620,8484829519-8484873271,5859767462-5859911897,9987328-10008767,656641-673714,262248430-262271846\r\n";
+    private static long Pow10(int exp)
+    {
+        long result = 1;
+        for (int i = 0; i < exp; i++)
+            result *= 10;
+        return result;
+    }
+
+    public Advent2()
+    {
+        Console.WriteLine($"del1: {del1()},{del2()}");
+    }
+
+    public long del1()
+    {
+        var st = new HashSet<long>();
+
+        string[] inputLinja = test.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string dolz in inputLinja)
+        {
+            string[] parts = dolz.Trim().Split('-');
+
+            if (parts.Length != 2 ||
+                !long.TryParse(parts[0], out long prv) ||
+                !long.TryParse(parts[1], out long zadn))
+            {
+                continue;
+            }
+            for (int k = 1; k <= 9; k++)
+            {
+                long pow = Pow10(k);
+                long pow1 = pow + 1;
+
+                long min = (k == 1) ? 1 : Pow10(k - 1);
+                long max = pow - 1;
+                long dolzprv = (prv + pow1 - 1) / pow1;
+                long dolzkonc = zadn / pow1;
+                long start = Math.Max(min, dolzprv);
+                long konc = Math.Min(max, dolzkonc);
+
+                if (min * pow1 > zadn)
+                {
+                    break;
+                }
+
+                if (start <= konc)
+                {
+                    for (long i = start; i <= konc; i++)
+                    {
+                        long j = i * pow1;
+                        if (j >= prv && j <= zadn)
+                        {
+                            st.Add(j);
+                        }
+                    }
+                }
+            }
+        }
+        return st.Sum();
+    }
+    public long del2()
+    {
+        var st = new HashSet<long>();
+        string[] inputLinja = test.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string dolz in inputLinja)
+        {
+            string[] parts = dolz.Trim().Split('-');
+            if (parts.Length != 2 ||
+                !long.TryParse(parts[0], out long prv) ||
+                !long.TryParse(parts[1], out long zadn))
+            {
+                continue;
+            }
+            for (long num = prv; num <= zadn; num++)
+            {
+                if (SePonavla(num))
+                {
+                    st.Add(num);
+                }
+            }
+        }
+        return st.Sum();
+    }
+
+    private bool SePonavla(long num)
+    {
+        string s = num.ToString();
+        int dolz = s.Length;
+        for (int vzorcdolz = 1; vzorcdolz <= dolz / 2; vzorcdolz++)
+        {
+            if (dolz % vzorcdolz == 0)
+            {
+                string vzorc = s.Substring(0, vzorcdolz);
+                bool ponavla = true;
+                for (int i = vzorcdolz; i < dolz; i += vzorcdolz)
+                {
+                    if (s.Substring(i, vzorcdolz) != vzorc)
+                    {
+                        ponavla = false;
+                        break;
+                    }
+                }
+                if (ponavla)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
